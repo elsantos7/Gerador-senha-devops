@@ -16,7 +16,9 @@ wget -O $PACKAGE $URL
 
 echo "📦 Instalando pacote..."
 
-sudo dpkg -i $PACKAGE
+#sudo dpkg -i $PACKAGE
+sudo apt update
+sudo apt install -y ./gerador-senha-devops-pkg.deb
 
 echo "✅ Instalação concluída!"
 
