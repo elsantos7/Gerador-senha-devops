@@ -14,3 +14,16 @@ Execute o comando abaixo no terminal:
 
 ```bash
 curl -fsSL https://raw.githubusercontent.com/elsantos7/Gerador-senha-devops/main/install.sh | bash
+
+## Instalação manual
+Baixe o pacote da última release:
+
+https://github.com/elsantos7/Gerador-senha-devops/releases
+
+sudo dpkg -i gerador-senha-devops-pkg.deb
+
+Após instalar
+
+Execute:
+
+gerador-senha-devops
