@@ -3,7 +3,7 @@ Version: 1.0.0
 Section: utils
 Priority: optional
 Architecture: all
-Depends: python3
+Depends: python3, python3-tk
 Maintainer: Eri <eri@devops.local>
 Description: Gerador de Senha DevOps
  Aplicativo gráfico para geração de senhas seguras
