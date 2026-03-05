@@ -1,0 +1,310 @@
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+
+# ===== CÓDIGO DO APLICATIVO =====
+# (cole aqui o código completo que você enviou)
+import tkinter as tk
+from tkinter import ttk
+import random
+import string
+
+# =============================
+# CONFIGURAÇÕES VISUAIS
+# =============================
+BG_MAIN = "#0B0F14"
+BG_PANEL = "#111827"
+BG_CARD = "#161B22"
+ACCENT = "#10B981"
+TEXT = "#E5E7EB"
+TEXT_DIM = "#9CA3AF"
+BTN = "#059669"
+WARN = "#FBBF24"
+
+FONT_TITLE = ("Segoe UI", 16, "bold")
+FONT_PASS = ("Consolas", 12)
+FONT_WATERMARK = ("Segoe UI", 9, "italic")
+
+# =============================
+# POLÍTICA DE SENHA
+# =============================
+MIN_TAM = 8
+MAX_TAM = 30
+
+AMBIGUOS = "O0Il1\"'`"
+
+def limpar(txt):
+    return ''.join(c for c in txt if c not in AMBIGUOS)
+
+UPPER = limpar(string.ascii_uppercase)
+LOWER = limpar(string.ascii_lowercase)
+DIGITS = limpar(string.digits)
+SYMBOLS = limpar(string.punctuation)
+
+# =============================
+# GERADOR
+# =============================
+def gerar_senha(tam, grupos):
+    senha = [random.choice(g) for g in grupos]
+    pool = ''.join(grupos)
+    for _ in range(tam - len(senha)):
+        senha.append(random.choice(pool))
+    random.shuffle(senha)
+    return ''.join(senha)
+
+def copiar(txt):
+    root.clipboard_clear()
+    root.clipboard_append(txt)
+    status.set("Senha copiada com sucesso")
+    status_label.config(fg=ACCENT)
+
+def copiar_tudo():
+    if not senhas_geradas:
+        status.set("Nada para copiar ainda.")
+        status_label.config(fg=WARN)
+        return
+    dados = []
+    for i, s in enumerate(senhas_geradas, 1):
+        dados.append(f"usuario{i};{s}")
+    copiar("\n".join(dados))
+
+# =============================
+# MOUSE WHEEL
+# =============================
+def _on_mousewheel(event):
+    if event.delta:
+        canvas.yview_scroll(int(-1 * (event.delta / 120)), "units")
+    elif event.num == 4:
+        canvas.yview_scroll(-1, "units")
+    elif event.num == 5:
+        canvas.yview_scroll(1, "units")
+
+def bind_mousewheel(widget):
+    widget.bind_all("<MouseWheel>", _on_mousewheel)
+    widget.bind_all("<Button-4>", _on_mousewheel)
+    widget.bind_all("<Button-5>", _on_mousewheel)
+
+# =============================
+# GERAR (COM VALIDAÇÕES)
+# =============================
+def gerar():
+    for w in lista_frame.winfo_children():
+        w.destroy()
+    senhas_geradas.clear()
+    canvas.yview_moveto(0.0)
+
+    try:
+        qtd = int(entry_qtd.get())
+        tam = int(entry_len.get())
+
+        if tam < MIN_TAM:
+            status.set("A política de segurança exige no mínimo 8 caracteres.")
+            status_label.config(fg=WARN)
+            _recalc_scroll()
+            return
+
+        if tam > MAX_TAM:
+            status.set("Comprimento máximo permitido é 30 caracteres.")
+            status_label.config(fg=WARN)
+            _recalc_scroll()
+            return
+
+        grupos = []
+        if v_up.get(): grupos.append(UPPER)
+        if v_low.get(): grupos.append(LOWER)
+        if v_num.get(): grupos.append(DIGITS)
+        if v_sym.get(): grupos.append(SYMBOLS)
+
+        if len(grupos) < 3:
+            status.set("A política de segurança exige no mínimo 3 dos 4 tipos de caracteres disponíveis.")
+            status_label.config(fg=WARN)
+            _recalc_scroll()
+            return
+
+        status.set("Senhas geradas com sucesso")
+        status_label.config(fg=ACCENT)
+
+        for i in range(1, qtd + 1):
+            senha = gerar_senha(tam, grupos)
+            senhas_geradas.append(senha)
+
+            card = tk.Frame(lista_frame, bg=BG_CARD, padx=12, pady=8)
+            card.pack(fill="x", pady=6)
+
+            tk.Label(card, text=f"{i}", bg=BG_CARD, fg=ACCENT,
+                     width=2, font=("Segoe UI", 10, "bold")).pack(side="left")
+
+            info = tk.Frame(card, bg=BG_CARD)
+            info.pack(side="left", padx=10, fill="x", expand=True)
+
+            tk.Label(info, text=f"USUÁRIO {i}",
+                     fg=TEXT_DIM, bg=BG_CARD,
+                     font=("Segoe UI", 8)).pack(anchor="w")
+
+            tk.Label(info, text=senha,
+                     fg=TEXT, bg=BG_CARD,
+                     font=FONT_PASS).pack(anchor="w")
+
+            tk.Button(card, text="⧉",
+                      bg=BG_PANEL, fg=TEXT,
+                      relief="flat",
+                      command=lambda s=senha: copiar(s)).pack(side="right")
+
+    except ValueError:
+        status.set("Informe valores válidos.")
+        status_label.config(fg=WARN)
+
+    _recalc_scroll()
+    canvas.yview_moveto(0.0)
+
+# =============================
+# SCROLL REGION
+# =============================
+def _recalc_scroll():
+    root.update_idletasks()
+    canvas.configure(scrollregion=canvas.bbox("all"))
+
+# =============================
+# JANELA
+# =============================
+root = tk.Tk()
+root.title("Gerador de Senha DevOps")
+root.geometry("1200x700")
+root.configure(bg=BG_MAIN)
+root.resizable(False, False)
+
+senhas_geradas = []
+
+# =============================
+# SCROLLBAR ESTILIZADA
+# =============================
+style = ttk.Style()
+style.theme_use("default")
+style.configure(
+    "Vertical.TScrollbar",
+    background=ACCENT,
+    troughcolor="#1F2937",
+    bordercolor="#1F2937",
+    arrowcolor=TEXT,
+    width=14
+)
+
+# =============================
+# HEADER
+# =============================
+header = tk.Frame(root, bg=BG_MAIN, pady=10)
+header.pack(fill="x")
+
+tk.Label(header, text="🛡 Gerador de Senha DevOps",
+         fg=TEXT, bg=BG_MAIN,
+         font=FONT_TITLE).pack(side="left", padx=20)
+
+tk.Label(header, text="AES-256 Randomizer Active",
+         fg=TEXT_DIM, bg=BG_MAIN).pack(side="right", padx=20)
+
+# =============================
+# BODY
+# =============================
+body = tk.Frame(root, bg=BG_MAIN)
+body.pack(fill="both", expand=True, padx=20, pady=10)
+
+# =============================
+# SIDEBAR
+# =============================
+side = tk.Frame(body, bg=BG_PANEL, width=280)
+side.pack(side="left", fill="y", padx=(0, 15))
+side.pack_propagate(False)
+
+tk.Label(side, text="Configurações",
+         fg=TEXT, bg=BG_PANEL,
+         font=("Segoe UI", 12, "bold")).pack(anchor="w", padx=15, pady=10)
+
+tk.Label(side, text="Comprimento", fg=TEXT_DIM, bg=BG_PANEL).pack(anchor="w", padx=15)
+entry_len = tk.Entry(side)
+entry_len.insert(0, "12")
+entry_len.pack(fill="x", padx=15, pady=5)
+
+tk.Label(side, text="Quantidade de Senhas", fg=TEXT_DIM, bg=BG_PANEL).pack(anchor="w", padx=15)
+entry_qtd = tk.Entry(side)
+entry_qtd.insert(0, "7")
+entry_qtd.pack(fill="x", padx=15, pady=5)
+
+v_up = tk.IntVar(value=1)
+v_low = tk.IntVar(value=1)
+v_num = tk.IntVar(value=1)
+v_sym = tk.IntVar(value=0)
+
+def chk(text, var):
+    tk.Checkbutton(
+        side, text=text, variable=var,
+        bg=BG_PANEL, fg=TEXT,
+        selectcolor=BG_CARD,
+        activebackground=BG_PANEL
+    ).pack(anchor="w", padx=15, pady=4)
+
+chk("Letras Maiúsculas", v_up)
+chk("Letras Minúsculas", v_low)
+chk("Números", v_num)
+chk("Caracteres Especiais", v_sym)
+
+tk.Button(side, text="Gerar Novas Senhas",
+          bg=BTN, fg="white",
+          relief="flat",
+          command=gerar).pack(fill="x", padx=15, pady=15)
+
+# =============================
+# RESULTADOS
+# =============================
+main = tk.Frame(body, bg=BG_MAIN)
+main.pack(side="left", fill="both", expand=True)
+
+top_res = tk.Frame(main, bg=BG_MAIN)
+top_res.pack(fill="x")
+
+tk.Label(top_res, text="Resultados da Geração",
+         fg=TEXT, bg=BG_MAIN,
+         font=("Segoe UI", 12, "bold")).pack(side="left")
+
+tk.Button(top_res, text="Copiar Tudo",
+          bg=BG_PANEL, fg=TEXT,
+          relief="flat",
+          command=copiar_tudo).pack(side="right")
+
+canvas = tk.Canvas(main, bg=BG_MAIN, highlightthickness=0)
+canvas.pack(fill="both", expand=True, pady=10)
+
+scroll = ttk.Scrollbar(main, orient="vertical",
+                       command=canvas.yview,
+                       style="Vertical.TScrollbar")
+scroll.pack(side="right", fill="y")
+
+canvas.configure(yscrollcommand=scroll.set)
+
+lista_frame = tk.Frame(canvas, bg=BG_MAIN)
+canvas.create_window((0, 0), window=lista_frame, anchor="nw")
+lista_frame.bind("<Configure>", lambda e: _recalc_scroll())
+
+bind_mousewheel(canvas)
+
+# =============================
+# STATUS + MARCA D'ÁGUA
+# =============================
+footer = tk.Frame(root, bg=BG_MAIN)
+footer.pack(fill="x", pady=6)
+
+status = tk.StringVar()
+status_label = tk.Label(
+    footer, textvariable=status,
+    fg=ACCENT, bg=BG_MAIN,
+    font=("Segoe UI", 9)
+)
+status_label.pack(side="left", padx=20)
+
+tk.Label(
+    footer,
+    text="Desenvolvido por Eri",
+    fg=TEXT_DIM,
+    bg=BG_MAIN,
+    font=FONT_WATERMARK
+).pack(side="right", padx=20)
+
+root.mainloop()

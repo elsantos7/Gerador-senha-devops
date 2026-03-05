@@ -1,0 +1,11 @@
+Package: gerador-senha-devops
+Version: 1.0.0
+Section: utils
+Priority: optional
+Architecture: all
+Depends: python3
+Maintainer: Eri <eri@devops.local>
+Description: Gerador de Senha DevOps
+ Aplicativo gráfico para geração de senhas seguras
+ com políticas de segurança corporativas.
+ Desenvolvido por Eri.
