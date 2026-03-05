@@ -1,0 +1,8 @@
+[Desktop Entry]
+Name=Gerador de Senha DevOps
+Comment=Gerador de senhas seguras para DevOps
+Exec=/usr/bin/gerador-senha-devops
+Icon=utilities-terminal
+Terminal=false
+Type=Application
+Categories=Utility;Security;
