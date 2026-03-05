@@ -1,0 +1,33 @@
+name: DevOps CI Pipeline
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+
+jobs:
+  build-test:
+    runs-on: ubuntu-latest
+
+    steps:
+
+    - name: Checkout repository
+      uses: actions/checkout@v4
+
+    - name: Mostrar estrutura do projeto
+      run: |
+        echo "Estrutura do projeto:"
+        ls -lah
+
+    - name: Validar arquivos principais
+      run: |
+        echo "Validando projeto..."
+        test -f README.md
+        test -f criar-atalho-gerador-senha-devops.sh
+        echo "Arquivos principais OK"
+
+    - name: Testar execução do script
+      run: |
+        chmod +x criar-atalho-gerador-senha-devops.sh
+        echo "Script executável validado"
