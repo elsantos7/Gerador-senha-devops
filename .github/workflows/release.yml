@@ -1,0 +1,29 @@
+name: Release DevOps Package
+
+on:
+  push:
+    tags:
+      - "v*"
+
+jobs:
+  build-release:
+    runs-on: ubuntu-latest
+
+    steps:
+
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install dependencies
+        run: |
+          sudo apt update
+          sudo apt install -y dpkg-dev
+
+      - name: Build deb package
+        run: |
+          dpkg-deb --build gerador-senha-devops-pkg
+
+      - name: Create Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: gerador-senha-devops-pkg.deb
