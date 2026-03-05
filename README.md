@@ -6,7 +6,11 @@
 
 Gerador de senhas aleatórias para uso DevOps e automação.
 
-## Instalação
+Você pode instalar o **Gerador de Senhas DevOps** automaticamente utilizando o script de instalação.
+
+### Instalação rápida
+
+Execute o comando abaixo no terminal:
 
 ```bash
-sudo dpkg -i gerador-senha-devops.deb
+curl -fsSL https://raw.githubusercontent.com/elsantos7/Gerador-senha-devops/main/install.sh | bash
